@@ -43,7 +43,6 @@ You need to read the ticket text and provide the response from below four catego
     billing,
     technical,
     general,
-    urgent
 Return only a single word. No markdown, No explaination.
 """
 
