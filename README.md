@@ -31,3 +31,104 @@ therwise a detailed JSON structure for analyze request.
 | POST   | /analyze/batch  | It takes multiple ticket_texts and after processing returned detailed JSON structured of the ticket along with total count, success and failed count |
 
 ## Setup
+
+1. Clone the repo
+   git clone https://github.com/vishalsinhacodes/support-ticket-ai.git
+   cd support-ticket-ai
+
+2. Create and activate virtual environment
+
+   Windows:
+   python -m venv venv
+   venv\Scripts\activate
+
+   Mac/Linux:
+   python3 -m venv venv
+   source venv/bin/activate
+
+3. Install dependencies
+   pip install -r requirements.txt
+
+4. Set your OpenAI API key as environment variable
+   The application reads OPENAI_API_KEY automatically from your environment.
+   Get your key from https://platform.openai.com/api-keys
+
+   Windows:
+   set OPENAI_API_KEY=your_key_here
+
+   Mac/Linux:
+   export OPENAI_API_KEY=your_key_here
+
+   Alternatively, you can use a .env file:
+   1. Install python-dotenv
+      pip install python-dotenv
+   2. Create a .env file in the project root
+      OPENAI_API_KEY=your_key_here
+   3. Add this to the top of main.py
+      from dotenv import load_dotenv
+      load_dotenv()
+
+5. Run the server
+   uvicorn main:app --reload
+
+API docs available at http://localhost:8000/docs
+
+## Example Usage
+
+Single classification:
+curl -X POST http://localhost:8000/classify \
+ -H "Content-Type: application/json" \
+ -d "{\"ticket_text\": \"My payment failed but I was charged twice\"}"
+
+Response:
+{"category": "billing"}
+
+Full analysis:
+curl -X POST http://localhost:8000/analyze \
+ -H "Content-Type: application/json" \
+ -d "{\"ticket_text\": \"URGENT: system is down, losing money every minute\"}"
+
+Response:
+{
+"analysis": {
+"category": "technical",
+"priority": "critical",
+"summary": "System outage causing financial loss",
+"sentiment": "frustrated"
+}
+}
+
+Batch classification:
+curl -X POST http://localhost:8000/classify/batch \
+ -H "Content-Type: application/json" \
+ -d "{\"tickets\": [\"My payment failed\", \"App keeps crashing\", \"What are your hours?\"]}"
+
+Response:
+{
+"results": [...],
+"total": 3,
+"successful": 3,
+"failed": 0
+}
+
+## Design Decisions
+
+- **Schema separation — removed `urgent` from categories** — In the original schema,
+  `urgent` appeared as both a category and overlapped with priority levels. If a billing
+  issue was also urgent, the LLM had to choose between `category: billing` and
+  `category: urgent` — it couldn't capture both. Removing `urgent` from categories and
+  adding `critical` to priority means a ticket can now be `category: billing, 
+priority: critical` simultaneously — two separate pieces of information, no ambiguity.
+
+- **Async batch processing with asyncio.gather()** — Processing 100 tickets sequentially
+  would take ~100 seconds (1 second per OpenAI call). Using asyncio.gather() with
+  asyncio.to_thread() runs all tickets concurrently — each gets its own thread, all
+  OpenAI calls happen simultaneously, total time drops to ~1 second regardless of batch size.
+
+- **Independent failure handling in batch** — If one ticket fails, the rest still succeed.
+  Each item is wrapped in try/except inside asyncio.gather(return_exceptions=True) so a
+  single bad input never crashes the whole batch.
+
+- **Single OpenAI client instance** — The client is created once at module level, not
+  inside each function call. This avoids connection overhead on every request and is more
+  efficient under load.
