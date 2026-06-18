@@ -2,6 +2,7 @@ venv/
 __pycache__/
 *.pyc
 .env
+*.log
 
 day1_classifier.py
-day2_classifier.py
+day2_classifier.py"*.log" 
