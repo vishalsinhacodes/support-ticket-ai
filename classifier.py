@@ -1,28 +1,10 @@
 from openai import OpenAI
 import json
-import logging
-from logging.handlers import RotatingFileHandler
 import time
 import functools
+from logger import get_logger
 
-
-# Create logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-# Create rotating file handler
-handler = RotatingFileHandler(
-    filename="app.log",
-    maxBytes=5 * 1024 * 1024,   # 5MB per file
-    backupCount=3               # keep last 3 files
-)
-
-# Create formatter
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler.setFormatter(formatter)
-
-# Add handler to logger
-logger.addHandler(handler)
+logger = get_logger(__name__)
 
 def time_taken(func):
     @functools.wraps(func)

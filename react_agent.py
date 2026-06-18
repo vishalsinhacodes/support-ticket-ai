@@ -1,6 +1,9 @@
 from classifier import analyze_ticket, classify_ticket, client, MODEL
 import json
 from typing import Any
+from logger import get_logger
+
+logger = get_logger(__name__)
 
 def count_words(ticket_text: str) -> int:
     return len(ticket_text.split(" "))
@@ -95,6 +98,7 @@ def run_agent(question: str):
         )
         
         msg = response.choices[0].message
+        logger.info(f"Raw message from the LLM: {msg}")
         
         if msg.tool_calls:
             messages.append(msg)
@@ -102,15 +106,21 @@ def run_agent(question: str):
                 name = tc.function.name                     # type:ignore
                 args = json.loads(tc.function.arguments)    # type:ignore
                 
+                logger.info(f"Function name: {name}, Function arguments: {args}")
+                
                 # Call the right function
                 if name == "classify_ticket":
                     result = classify_ticket(args["ticket_text"])
+                    logger.info(f"classify_ticket result : {result}")
                 elif name == "count_words":
                     result = count_words(args["ticket_text"])
+                    logger.info(f"count_words result : {result}")
                 elif name == "get_priority":
                     result = get_priority(args["ticket_text"])
+                    logger.info(f"get_priority result : {result}")
                 else:
                     result = "Unknown tool"
+                    logger.error("Unknown tool")
                 
                 messages.append(
                     {
@@ -120,6 +130,7 @@ def run_agent(question: str):
                     }
                 )
         else:
+            logger.info(f"Final result : {msg.content}")
             return msg.content
    
 if __name__ == "__main__":
