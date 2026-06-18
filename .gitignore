@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.env
+
+day1_classifier.py
+day2_classifier.py
