@@ -1,0 +1,5 @@
+2026-06-18 13:51:17,005 - classifier - INFO - ticket_text: What are your business hours?
+2026-06-18 13:51:20,242 - classifier - INFO - Raw Response: general
+2026-06-18 15:40:23,179 - classifier - INFO - ticket_text: The app crashes every time I open it.
+2026-06-18 15:40:26,775 - classifier - INFO - Raw Response: technical
+2026-06-18 15:40:26,775 - classifier - INFO - OpenAI call took 3.60s
