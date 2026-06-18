@@ -66,7 +66,11 @@ Response should be in JSON format and No markdown.
 @time_taken
 def classify_ticket(ticket_text: str):
     logger.info(f"ticket_text: {ticket_text}")
-    try:
+    
+    if not ticket_text or not ticket_text.strip():
+        raise ValueError("Ticket text cannot be empty")
+            
+    try:        
         response = client.chat.completions.create(
             model=MODEL,
             temperature=0,
@@ -92,7 +96,11 @@ def classify_ticket(ticket_text: str):
 @time_taken    
 def analyze_ticket(ticket_text: str):
     logger.info(f"ticket_text: {ticket_text}")
-    try:
+    
+    if not ticket_text or not ticket_text.strip():
+        raise ValueError("Ticket text cannot be empty")
+            
+    try:               
         response = client.chat.completions.create(
             model=MODEL,
             temperature=0,

@@ -23,18 +23,22 @@ class UserResponse(BaseModel):
     pass    
     
 @app.post("/classify")
-def classify(request: UserRequest):
+async def classify(request: UserRequest):
     try:
-        result = classify_ticket(request.ticket_text)
+        result = await asyncio.to_thread(classify_ticket, request.ticket_text)
         return {"category": result}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception:
         raise HTTPException(status_code=502, detail="LLM not available")
 
 @app.post("/analyze")
-def analyze(request: UserRequest):
+async def analyze(request: UserRequest):
     try:
-        result = analyze_ticket(request.ticket_text)
+        result = await asyncio.to_thread(analyze_ticket, request.ticket_text)
         return {"analysis": result}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))    
     except Exception:
         raise HTTPException(status_code=502, detail="LLM not available")
     

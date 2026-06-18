@@ -5,4 +5,4 @@ __pycache__/
 *.log
 
 day1_classifier.py
-day2_classifier.py"*.log" 
+day2_classifier.py
