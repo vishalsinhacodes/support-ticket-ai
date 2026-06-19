@@ -29,6 +29,7 @@ therwise a detailed JSON structure for analyze request.
 | POST   | /analyze        | It takes one ticket_text and after processing returned detailed JSON structured of the ticket                                                        |
 | POST   | /classify/batch | It takes multiple ticket_texts and after processing returned category of the ticket along with total count, success and failed count                 |
 | POST   | /analyze/batch  | It takes multiple ticket_texts and after processing returned detailed JSON structured of the ticket along with total count, success and failed count |
+| POST   | /process/batch  | Takes multiple tickets, runs each through the multi-agent pipeline (analyze + respond), returns results with total/success/failed counts             |
 
 ## Setup
 
@@ -111,6 +112,26 @@ Response:
 "failed": 0
 }
 
+## Agentic Patterns
+
+### ReAct Agent
+
+A standalone agent (react_agent.py) that follows the Reasoning + Acting pattern. It has
+access to three tools — classify_ticket, count_words, and get_priority. Given a question,
+the agent thinks about what information it needs, calls the appropriate tool, observes
+the result, and either calls another tool or returns a final answer. Each step is logged
+for full observability — the model's reasoning, tool calls, arguments, and results are
+all visible in the log file.
+
+### Multi-Agent Pipeline
+
+A 2-agent system (multi_agent.py) with a clear separation of concerns. The Analyzer Agent
+extracts category, priority, and sentiment from a ticket. The Response Agent takes those
+results and writes a professional, customer-facing reply. A manager function coordinates
+both agents sequentially — Agent 2 depends on Agent 1's output, so they cannot run
+concurrently. The full pipeline also supports concurrent batch processing across multiple
+tickets using asyncio.gather().
+
 ## Design Decisions
 
 - **Schema separation — removed `urgent` from categories** — In the original schema,
@@ -132,3 +153,9 @@ priority: critical` simultaneously — two separate pieces of information, no am
 - **Single OpenAI client instance** — The client is created once at module level, not
   inside each function call. This avoids connection overhead on every request and is more
   efficient under load.
+
+- **Centralized logging in logger.py** — Initially each module (classifier.py, react_agent.py)
+  had its own logger with no handler attached, so logs from react_agent.py were going nowhere.
+  Moving the RotatingFileHandler setup into a single logger.py module means any file can import
+  get_logger() and immediately have working file-based logging — one place controls log format,
+  rotation size, and file location for the entire project.
