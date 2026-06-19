@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from classifier import classify_ticket, analyze_ticket
 from pydantic import BaseModel
+from multi_agent import process_tickets_batch
 import asyncio
 
 app = FastAPI(
@@ -110,6 +111,13 @@ async def analyze_batch(request: BatchRequest):
         "total": total_counts,
         "success": success_count,
         "failed": failed_count
-    }  
+    }
+    
+@app.post("/process/batch")
+async def process_batch(tickets: BatchRequest):
+    result = await process_tickets_batch(tickets.tickets)
+    return result
+    
+        
         
             

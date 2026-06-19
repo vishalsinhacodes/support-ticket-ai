@@ -53,6 +53,7 @@ def process_ticket(ticket_text: str):
         "customer_reply": write_res
     }
 
+# Uncomment to run only process_ticket function
 # if __name__ == "__main__":
 #     result = process_ticket("URGENT: system is down, losing money every minute")
 #     print(result)
@@ -89,13 +90,14 @@ async def process_tickets_batch(tickets: list[str]):
         "success": success_count,
         "failed": failed_count
     }  
-    
-if __name__ == "__main__":
-    tickets = [
-        "My payment failed and I was charged twice",
-        "URGENT: system is down, losing money every minute",
-        "What are your business hours?"
-    ]
-    result = asyncio.run(process_tickets_batch(tickets))
-    print(result)    
+
+# Uncomment to run only process_tickets_batch function    
+# if __name__ == "__main__":
+#     tickets = [
+#         "My payment failed and I was charged twice",
+#         "URGENT: system is down, losing money every minute",
+#         "What are your business hours?"
+#     ]
+#     result = asyncio.run(process_tickets_batch(tickets))
+#     print(result)    
       
