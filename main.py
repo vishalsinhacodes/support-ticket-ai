@@ -110,6 +110,6 @@ async def analyze_batch(request: BatchRequest):
         "total": total_counts,
         "success": success_count,
         "failed": failed_count
-    }
+    }  
         
             

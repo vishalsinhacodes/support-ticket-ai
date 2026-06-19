@@ -1,4 +1,5 @@
 from classifier import client, MODEL, time_taken, logger, analyze_ticket
+import asyncio
 
 RESPONSE_AGENT_PROMPT = """
 You are a helpful response agent.
@@ -52,6 +53,49 @@ def process_ticket(ticket_text: str):
         "customer_reply": write_res
     }
 
+# if __name__ == "__main__":
+#     result = process_ticket("URGENT: system is down, losing money every minute")
+#     print(result)
+    
+async def process_tickets_batch(tickets: list[str]):
+    tasks = [asyncio.to_thread(process_ticket, ticket) for ticket in tickets]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    total_counts = len(results)
+    success_count = 0
+    failed_count = 0
+    results_list = []
+    
+    for result, ticket in zip(results, tickets):
+        if isinstance(result, Exception):
+            failed_count += 1
+        else:
+            success_count += 1
+            
+        status = "failed" if isinstance(result, Exception) else "success"
+        response = str(result) if isinstance(result, Exception) else result
+        
+        results_list.append(
+            {
+                "ticket_text": ticket,
+                "response": response,
+                "status": status
+            }
+        )
+        
+    return {
+        "result": results_list,
+        "total": total_counts,
+        "success": success_count,
+        "failed": failed_count
+    }  
+    
 if __name__ == "__main__":
-    result = process_ticket("URGENT: system is down, losing money every minute")
-    print(result)
+    tickets = [
+        "My payment failed and I was charged twice",
+        "URGENT: system is down, losing money every minute",
+        "What are your business hours?"
+    ]
+    result = asyncio.run(process_tickets_batch(tickets))
+    print(result)    
+      
