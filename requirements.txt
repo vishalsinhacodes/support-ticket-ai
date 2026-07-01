@@ -3,3 +3,4 @@ uvicorn[standard]
 openai
 pydantic
 python-dotenv  # optional, only needed if using .env file
+slowapi
