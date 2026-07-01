@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import json
@@ -19,7 +20,7 @@ def time_taken(func):
         return result
     return wrapper
 
-client = OpenAI()
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 MODEL = "gpt-4o-mini"
 
 CLASSIFY_SYSTEM_PROMPT = """
