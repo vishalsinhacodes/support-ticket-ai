@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
 from openai import OpenAI
 import json
 import time
 import functools
 from logger import get_logger
+
+load_dotenv()
 
 logger = get_logger(__name__)
 
